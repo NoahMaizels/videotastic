@@ -26,6 +26,14 @@ exports.getUser = (req, res) => {
     })
 }
 
+exports.getUsers = (req, res) => {
+  User.fetchAll()
+  .then(users => {
+    res.send(users[0])
+  })
+  .catch(err => res.send(err))
+}
+
 exports.deleteUser = (req, res) => {
   const id = req.params.id
   User.deleteById(id)
