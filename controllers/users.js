@@ -1,21 +1,47 @@
 const User = require('../models/user');
 
-exports.postUser = (req, res) => {
-  console.log('Post user create')
-  const user_name = req.body.user_name
-  const first_name = req.body.first_name
-  const last_name = req.body.last_name 
-  const birth_date = req.body.birth_date
-  const password = req.body.password
-  const creation_time = req.body.creation_time
-  const email = req.body.email
+exports.createUser = (req, res) => {
   
-  const user = new User(null, user_name, first_name, last_name, birth_date, password, creation_time, email)
-  
-  user
-    .save()
-    .then(res.redirect('/'))
-    .catch(err => console.log(err));
+  const user = new User(
+    null, 
+    req.body.user_name, 
+    req.body.first_name, 
+    req.body.last_name, 
+    req.body.birth_date, 
+    req.body.password, 
+    req.body.creation_time, 
+    req.body.email
+  )
+
+  User.exists(req.body.user_name, req.body.email)
+    .then(result => {
+      let error = {user_name: null, email: null}
+      console.log(result[0])
+      for (let i = 0; i < result[0].length; i++) {
+        if (result[0][i].user_name === req.body.user_name ) {
+          console.log('duplicate username')
+          error.user_name = true
+        } 
+        if (result[0][i].email === req.body.email ) {
+          console.log('duplicate email')
+          error.email = true
+        }
+      }
+      return error
+    })
+    .then(error => {
+      if (error.user_name || error.email) {
+        throw error
+      } 
+    })
+    .then(() => user.save())
+    .then(() => res.json({"user_name": req.body.user_name, "email": req.body.email}))
+    .catch(err => {
+      error = {error: true, "message": []}
+      if (err.user_name) error.message.push("This user name already exists")
+      if (err.email) error.message.push("This email already exists")
+      res.send(error)
+    })
 };
 
 exports.getUser = (req, res) => {
