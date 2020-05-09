@@ -17,6 +17,7 @@ module.exports = class User {
       'INSERT INTO users (user_name, first_name, last_name, birth_date, password, creation_time, email) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [this.user_name, this.first_name, this.last_name, this.birth_date, this.password, this.creation_time, this.email]
     );
+    console.log('saved')
   }
 
   static deleteById(id) {
@@ -31,8 +32,22 @@ module.exports = class User {
     return db.execute('SELECT * FROM users WHERE id = ?', [id]);
   }
 
-  static exists(user_name, email) {
+  static isUnique(user_name, email) {
+    const errorMessages = {error: null, messages: []}
     return db.execute('SELECT * FROM users WHERE user_name = ? OR email = ?', [user_name, email])
+    .then(result => {
+      for (let i = 0; i < result[0].length; i++) {
+        if (result[0][i].user_name === user_name ) {
+          errorMessages.error = true
+          errorMessages.messages.push({type: 'duplicateUserName', message: "This username already exists"})
+        } 
+        if (result[0][i].email === email) {
+          errorMessages.error = true
+          errorMessages.messages.push({type: 'duplicateEmail', message: "This email already exists"})
+        }
+      }
+      return errorMessages
+    })
   }
 
   static findByEmail(email) {

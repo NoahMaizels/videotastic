@@ -13,11 +13,6 @@ app.use(middleware.cors)
 
 app.use(cookieParser()) 
 
-app.use('/login', (req, res, next) => {
-  console.log(req.body)
-  next()
-})
-
 app.post('/login', auth.authenticate, auth.login)
 
 

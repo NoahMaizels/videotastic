@@ -1,46 +1,28 @@
+const bcrypt = require('bcrypt')
+const SALT_ROUNDS = 10
 const User = require('../models/user');
 
+
 exports.createUser = (req, res) => {
-  
-  const user = new User(
-    null, 
+  const user = new User(null, 
     req.body.user_name, 
     req.body.first_name, 
     req.body.last_name, 
     req.body.birth_date, 
     req.body.password, 
     req.body.creation_time, 
-    req.body.email
-  )
+    req.body.email)
 
-  User.exists(req.body.user_name, req.body.email)
+  User.isUnique(req.body.user_name, req.body.email)
     .then(result => {
-      let error = {user_name: null, email: null}
-      console.log(result[0])
-      for (let i = 0; i < result[0].length; i++) {
-        if (result[0][i].user_name === req.body.user_name ) {
-          console.log('duplicate username')
-          error.user_name = true
-        } 
-        if (result[0][i].email === req.body.email ) {
-          console.log('duplicate email')
-          error.email = true
-        }
-      }
-      return error
+      if (result.error) throw result
     })
-    .then(error => {
-      if (error.user_name || error.email) {
-        throw error
-      } 
-    })
+    .then(() => bcrypt.hash(user.password, SALT_ROUNDS))
+    .then(password => user.password = password)
     .then(() => user.save())
     .then(() => res.json({"user_name": req.body.user_name, "email": req.body.email}))
     .catch(err => {
-      error = {error: true, "message": []}
-      if (err.user_name) error.message.push("This user name already exists")
-      if (err.email) error.message.push("This email already exists")
-      res.send(error)
+      res.send(err)
     })
 };
 
