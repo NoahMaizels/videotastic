@@ -1,4 +1,5 @@
 const db = require('../util/database')
+const bcrypt = require('bcrypt')
 
 module.exports = class User {
   constructor(id, user_name, first_name, last_name, birth_date, password, creation_time, email) {
@@ -12,11 +13,51 @@ module.exports = class User {
     this.email = email
   }
 
-  save() {
+  create() {
     return db.execute(
       'INSERT INTO users (user_name, first_name, last_name, birth_date, password, creation_time, email) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [this.user_name, this.first_name, this.last_name, this.birth_date, this.password, this.creation_time, this.email]
     );
+  }
+
+  save() {
+    return db.execute(
+      'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, birth_date = ?, password = ?, creation_time =?, email = ? WHERE id = ?',
+      [this.user_name, this.first_name, this.last_name, this.birth_date, this.password, this.creation_time, this.email, this.id]
+    );
+  }
+
+  static edit(user_name, change) {
+    let user
+    return  User.isUnique(change.user_name ? change.user_name : "", change.email ? change.email : "")
+    .then(result => {
+      if (result.error) throw result
+    }).then(() => {
+      return db.execute('SELECT * FROM users WHERE user_name = ?', [user_name])
+    })
+      .then(targetUser => {
+        Object.keys(change).forEach(key => {
+          targetUser[0][0][key] = change[key]
+        })
+        user = targetUser[0][0]
+        return user
+      })
+      .then(user => {
+        let password = null
+        if (change.password) {
+          const SALT_ROUNDS = 10
+          password = bcrypt.hash(user.password, SALT_ROUNDS)
+        }
+        return password
+      })
+      .then(password => {
+        if (password) user.password = password
+        return user
+      })
+      .then(user => {
+        return Object.keys(user).map(key => user[key])
+      })
+      .catch(err => err)
   }
 
   static deleteById(id) {
@@ -48,9 +89,4 @@ module.exports = class User {
       return errorMessages
     })
   }
-
-  static findByEmail(email) {
-    return db.execute('SELECT * FROM users WHERE email = ?', [email]);
-  }
-
 };

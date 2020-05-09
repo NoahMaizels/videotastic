@@ -3,7 +3,8 @@ const SALT_ROUNDS = 10
 const User = require('../models/user');
 
 
-exports.createUser = (req, res) => {
+
+exports.create = (req, res) => {
   const user = new User(null, 
     req.body.user_name, 
     req.body.first_name, 
@@ -19,14 +20,27 @@ exports.createUser = (req, res) => {
     })
     .then(() => bcrypt.hash(user.password, SALT_ROUNDS))
     .then(password => user.password = password)
-    .then(() => user.save())
+    .then(() => user.create())
     .then(() => res.json({"user_name": req.body.user_name, "email": req.body.email}))
     .catch(err => {
       res.send(err)
     })
 };
 
-exports.getUser = (req, res) => {
+exports.edit = (req, res) => {
+  let username = req.body.username
+  let change = req.body.change
+  User.edit(username, change)
+  .then(result => {
+    if (result.error) throw result
+    let newUser = new User(...result)
+    newUser.save()
+    res.send({user_name: newUser.user_name, email: newUser.email})
+  })
+  .catch(err => res.send(err))
+}
+
+exports.get = (req, res) => {
   const id = req.params.id
   User.findById(id)
     .then(result => {
@@ -34,7 +48,7 @@ exports.getUser = (req, res) => {
     })
 }
 
-exports.getUsers = (req, res) => {
+exports.getAll = (req, res) => {
   User.fetchAll()
   .then(users => {
     res.send(users[0])
@@ -42,7 +56,8 @@ exports.getUsers = (req, res) => {
   .catch(err => res.send(err))
 }
 
-exports.deleteUser = (req, res) => {
+
+exports.delete = (req, res) => {
   const id = req.params.id
   User.deleteById(id)
   .then(res.redirect('/'))
