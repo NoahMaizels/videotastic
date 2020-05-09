@@ -17,7 +17,6 @@ module.exports = class User {
       'INSERT INTO users (user_name, first_name, last_name, birth_date, password, creation_time, email) VALUES (?, ?, ?, ?, ?, ?, ?)',
       [this.user_name, this.first_name, this.last_name, this.birth_date, this.password, this.creation_time, this.email]
     );
-    console.log('saved')
   }
 
   static deleteById(id) {
