@@ -1,9 +1,12 @@
 const { STATUS_CODES } = require('http')
 
 const cors = (req, res, next) => {
-  const origin = req.headers.origin
+  // console.log(req.headers.origin)
+  // const origin = req.headers.origin
 
-  res.setHeader('Access-Control-Allow-Origin', origin || '*')
+  // res.setHeader('Access-Control-Allow-Origin', origin || '*')
+  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3001')
+
   res.setHeader(
     'Access-Control-Allow-Methods',
     'POST, GET, PUT, DELETE, OPTIONS, XMODIFY'

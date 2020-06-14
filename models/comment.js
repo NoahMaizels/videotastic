@@ -1,41 +1,36 @@
 const db = require('../util/database')
 
-module.exports = class User {
-  constructor(id, user_name, first_name, last_name, birth_date, password, email, isVerified) {
+module.exports = class Comment {
+  constructor(id, userID, text) {
     this.id = id
-    this.user_name = user_name
-    this.first_name = first_name
-    this.last_name = last_name
-    this.birth_date = birth_date
-    this.password = password
-    this.email = email
-    this.isVerified = isVerified
+    this.userID = userID
+    this.text = text
   }
 
   create() {
     return db.execute(
-      'INSERT INTO users (user_name, first_name, last_name, birth_date, password, email) VALUES ( ?, ?, ?, ?, ?, ?)',
-      [this.user_name, this.first_name, this.last_name, this.birth_date, this.password, this.email]
+      'INSERT INTO comments (userID, text) VALUES ( ?, ?)',
+      [this.userID, this.text]
     );
   }
 
   save() {
     return db.execute(
-      'UPDATE users SET user_name = ?, first_name = ?, last_name = ?, birth_date = ?, password = ?, email = ? WHERE id = ?',
-      [this.user_name, this.first_name, this.last_name, this.birth_date, this.password, this.email, this.id]
+      'UPDATE users SET text = ? WHERE id = ?',
+      [this.text]
     );
   }
 
   static deleteById(id) {
-    return db.execute('DELETE FROM users WHERE id = ?', [id])
+    return db.execute('DELETE FROM comments WHERE id = ?', [id])
   }
 
   static fetchAll() {
-    return db.execute('SELECT * FROM users');
+    return db.execute('SELECT * FROM comments');
   }
 
   static findById(id) {
-    return db.execute('SELECT * FROM users WHERE id = ?', [id]);
+    return db.execute('SELECT * FROM comments WHERE id = ?', [id]);
   }
 
   static findByUsername(user_name) {
