@@ -24,7 +24,7 @@
     "express": "^4.16.3",
     "express-handlebars": "^3.0.0",
     "express-session": "^1.17.1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "morgan": "^1.10.0",
     "morgan-body": "^2.4.13",
     "mysql2": "^1.7.0",
